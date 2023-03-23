@@ -1,2 +1,1 @@
-# Linker
-Page for my links
+# https://neosh11.github.io/Linker/
