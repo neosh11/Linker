@@ -1,9 +1,10 @@
 {
   "name": "linker",
   "version": "0.1.0",
-  "homepage": "https://neosh11.github.io/links",
+  "homepage": "https://neosh11.github.io/Linker/",
   "private": true,
   "dependencies": {
+    "@neosh11/autocomplete-search": "^0.0.5",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -44,6 +45,7 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^5.0.0"
+    "gh-pages": "^5.0.0",
+    "tailwindcss": "^3.2.7"
   }
 }
