@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { String2ObjectAutoCompleteSearch } from "@neosh11/autocomplete-search";
+import { useSearch } from "autocomplete-search-react";
+import { useEffect, useState } from "react";
 
 interface Link {
   id: number;
@@ -9,26 +9,9 @@ interface Link {
 }
 
 const SearchBar = (p: {
-  autoCompleteSearch: String2ObjectAutoCompleteSearch;
-  completeList: any[];
-  setFilteredObjects: any;
+  onTextChange: (val: string) => void;
+  searchText: string;
 }) => {
-  const [searchText, setSearchText] = useState("");
-
-  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (
-    event
-  ) => {
-    if (event.target.value === "") {
-      p.setFilteredObjects(p.completeList);
-      setSearchText(event.target.value);
-    } else {
-      p.setFilteredObjects(
-        p.autoCompleteSearch.findObjects(event.target.value, 10)
-      );
-      setSearchText(event.target.value);
-    }
-  };
-
   return (
     <div className="bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
       <div className="relative py-3 sm:max-w-xl mx-auto">
@@ -40,8 +23,8 @@ const SearchBar = (p: {
           id="search"
           name="search"
           placeholder="Search..."
-          value={searchText}
-          onChange={handleInputChange}
+          value={p.searchText}
+          onChange={(event) => p.onTextChange(event.target.value)}
           className="shadow-md block w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-600 rounded"
         />
       </div>
@@ -79,7 +62,6 @@ const randomWords = () => {
 
 const LinkList = () => {
   const [links, setlinks] = useState<Link[]>([]);
-  const [filteredLinks, setFilteredLinks] = useState(links);
 
   useEffect(() => {
     const _links: Link[] = [];
@@ -93,27 +75,16 @@ const LinkList = () => {
       });
     }
     setlinks(_links);
-    setFilteredLinks(_links);
   }, []);
 
-  // make a use memo for autoCompleteSearch
-
-  const autoCompleteSearch = useMemo(() => {
-    const searchOptions = {
-      ignoreCase: true,
-      objectIdProperty: "id",
-      tokenizer: " ",
-    };
-    return new String2ObjectAutoCompleteSearch(searchOptions);
-  }, []);
-
-  useEffect(() => {
-    autoCompleteSearch.clear();
-    // fill autoCompleteSearch
-    links.forEach((link) => {
-      autoCompleteSearch.insert(link.title, link);
-    });
-  }, [autoCompleteSearch, links]);
+  // call useSearch hook to get autoCompleteSearch
+  const [onTextChange, filteredObjects, searchText] = useSearch({
+    data: links,
+    maxResults: 10,
+    searchId: "id",
+    searchKey: "title",
+    tokenizer: " ",
+  });
 
   // fill autoCompleteSearch
 
@@ -123,13 +94,9 @@ const LinkList = () => {
         <h1 className="text-2xl font-semibold text-gray-900">
           My Links Collection
         </h1>
-        <SearchBar
-          autoCompleteSearch={autoCompleteSearch}
-          completeList={links}
-          setFilteredObjects={setFilteredLinks}
-        />
+        <SearchBar onTextChange={onTextChange} searchText={searchText} />
         <ul className="mt-6 space-y-4">
-          {filteredLinks.map((link) => (
+          {filteredObjects.map((link) => (
             <li key={link.id} className="border-b border-gray-300">
               <a
                 href={link.url}
