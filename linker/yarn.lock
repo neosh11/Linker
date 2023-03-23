@@ -1549,10 +1549,10 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@neosh11/autocomplete-search@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@neosh11/autocomplete-search/-/autocomplete-search-0.0.5.tgz#069dc8f51ea8898a0f9c8dd4c38fb24e4a700fce"
-  integrity sha512-SUzMbSih5R2o4WlEF85meZSZkhNQOlLSZZGKOL7SJgy3+8/0/ZH0di9zVXFtlU10OkCZyQE/BXKdjmrGK+q8ow==
+"@neosh11/autocomplete-search@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@neosh11/autocomplete-search/-/autocomplete-search-0.0.6.tgz#55d384ea79db1b50028b228a2eb2ba3d019ef148"
+  integrity sha512-m4Ck2enMQd/E5jTnDIURfCp6np96MOLsohGWTLhvoAG9nsUeYF2lyihASyaCqUuNtjs0J+A09QVJ6Fg3a0HsHw==
 
 "@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1":
   version "5.1.1-v1"

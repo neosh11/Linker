@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { String2ObjectAutoCompleteSearch } from "@neosh11/autocomplete-search";
 
 interface Link {
@@ -23,7 +23,7 @@ const SearchBar = (p: {
       setSearchText(event.target.value);
     } else {
       p.setFilteredObjects(
-        p.autoCompleteSearch.findObjects(event.target.value)
+        p.autoCompleteSearch.findObjects(event.target.value, 10)
       );
       setSearchText(event.target.value);
     }
@@ -49,60 +49,73 @@ const SearchBar = (p: {
   );
 };
 
-const LinkList = () => {
-  const links: Link[] = [];
+// generate a number between 5 and 10
+const randomLength = () => {
+  return Math.floor(Math.random() * 6) + 5;
+};
 
-  // generate a number between 5 and 10
-  const randomLength = () => {
-    return Math.floor(Math.random() * 6) + 5;
-  };
+const randomStringLetters = () => {
+  const randomLength = () => Math.floor(Math.random() * 6) + 5; // Generate a random length between 5 and 10
+  const length = randomLength();
+  let result = "";
 
-  const randomStringLetters = () => {
-    const randomLength = () => Math.floor(Math.random() * 6) + 5; // Generate a random length between 5 and 10
-    const length = randomLength();
-    let result = "";
-
-    for (let i = 0; i < length; i++) {
-      const randomCharCode = Math.floor(Math.random() * 52); // Generate a random index between 0 and 51 (inclusive)
-      const charCode = randomCharCode + (randomCharCode < 26 ? 65 : 71); // Convert the random index to ASCII code (65-90 for A-Z, 97-122 for a-z)
-      result += String.fromCharCode(charCode);
-    }
-
-    return result;
-  };
-
-  // generate a string with 10 random words
-  const randomWords = () => {
-    let words = "";
-    for (let i = 0; i < randomLength(); i++) {
-      words += randomStringLetters() + " ";
-    }
-    return words;
-  };
-
-  // generate a lists of links with random names and urls
-  for (let i = 6; i < 3000; i++) {
-    links.push({
-      id: i,
-      // make title random
-      title: randomWords(),
-      url: `https://www.example${i}.com`,
-    });
+  for (let i = 0; i < length; i++) {
+    const randomCharCode = Math.floor(Math.random() * 52); // Generate a random index between 0 and 51 (inclusive)
+    const charCode = randomCharCode + (randomCharCode < 26 ? 65 : 71); // Convert the random index to ASCII code (65-90 for A-Z, 97-122 for a-z)
+    result += String.fromCharCode(charCode);
   }
 
-  const searchOptions = {
-    ignoreCase: true,
-    objectIdProperty: "id",
-    tokenizer: " ",
-  };
+  return result;
+};
 
-  const autoCompleteSearch = new String2ObjectAutoCompleteSearch(searchOptions);
-  // fill autoCompleteSearch
-  links.forEach((link) => {
-    autoCompleteSearch.insert(link.title, link);
-  });
+// generate a string with 10 random words
+const randomWords = () => {
+  let words = "";
+  for (let i = 0; i < randomLength(); i++) {
+    words += randomStringLetters() + " ";
+  }
+  return words;
+};
 
+const LinkList = () => {
+  const [links, setlinks] = useState<Link[]>([]);
   const [filteredLinks, setFilteredLinks] = useState(links);
+
+  useEffect(() => {
+    const _links: Link[] = [];
+    // generate a lists of links with random names and urls
+    for (let i = 6; i < 3000; i++) {
+      _links.push({
+        id: i,
+        // make title random
+        title: randomWords(),
+        url: `https://www.example${i}.com`,
+      });
+    }
+    setlinks(_links);
+    setFilteredLinks(_links);
+  }, []);
+
+  // make a use memo for autoCompleteSearch
+
+  const autoCompleteSearch = useMemo(() => {
+    const searchOptions = {
+      ignoreCase: true,
+      objectIdProperty: "id",
+      tokenizer: " ",
+    };
+    return new String2ObjectAutoCompleteSearch(searchOptions);
+  }, []);
+
+  useEffect(() => {
+    autoCompleteSearch.clear();
+    // fill autoCompleteSearch
+    links.forEach((link) => {
+      autoCompleteSearch.insert(link.title, link);
+    });
+  }, [autoCompleteSearch, links]);
+
+  // fill autoCompleteSearch
 
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col sm:py-12">
