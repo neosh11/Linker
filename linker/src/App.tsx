@@ -1,5 +1,7 @@
 import { useSearch } from "autocomplete-search-react";
-import { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import IPInfo, { IPInfoContext } from "ip-info-react";
+import emojiFlags, { EFlagKeys } from "country-flags-emoji";
 
 interface Link {
   id: number;
@@ -51,6 +53,25 @@ const randomStringLetters = () => {
   return result;
 };
 
+const Banner = () => {
+  const userInfo = useContext(IPInfoContext);
+
+  return (
+    <div className="bg-blue-500 text-white p-4 flex items-center justify-center">
+      <div className="text-lg font-semibold">
+        <span>
+          Location:{" "}
+          {userInfo.country_code &&
+            emojiFlags.flags[userInfo.country_code as EFlagKeys].emoji}{" "}
+          {userInfo.city || "Unknown"}
+        </span>
+        <span> | IP: {userInfo.ip || "Unknown"}</span>
+        <span> | Provider: {userInfo.org}</span>
+      </div>
+    </div>
+  );
+};
+
 // generate a string with 10 random words
 const randomWords = () => {
   let words = "";
@@ -61,12 +82,14 @@ const randomWords = () => {
 };
 
 const LinkList = () => {
+  // Access the fetched data
+
   const [links, setlinks] = useState<Link[]>([]);
 
   useEffect(() => {
     const _links: Link[] = [];
     // generate a lists of links with random names and urls
-    for (let i = 6; i < 3000; i++) {
+    for (let i = 6; i < 100; i++) {
       _links.push({
         id: i,
         // make title random
@@ -89,7 +112,8 @@ const LinkList = () => {
   // fill autoCompleteSearch
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6 flex flex-col sm:py-12">
+    <div className="min-h-screen bg-gray-100 flex flex-col ">
+      <Banner />
       <div className="relative py-3 sm:max-w-xl mx-auto text-center">
         <h1 className="text-2xl font-semibold text-gray-900">
           My Links Collection
@@ -116,9 +140,9 @@ const LinkList = () => {
 
 function App() {
   return (
-    <div>
+    <IPInfo>
       <LinkList />
-    </div>
+    </IPInfo>
   );
 }
 
