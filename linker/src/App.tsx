@@ -1,9 +1,7 @@
 import { useSearch } from "autocomplete-search-react";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import IPInfo, { IPInfoContext } from "ip-info-react";
 import emojiFlags, { EFlagKeys } from "country-flags-emoji";
-import { Fragment } from "react";
-import { Listbox, Transition } from "@headlessui/react";
 
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Combobox } from "@headlessui/react";
