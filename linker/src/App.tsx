@@ -2,6 +2,11 @@ import { useSearch } from "autocomplete-search-react";
 import React, { useContext, useEffect, useState } from "react";
 import IPInfo, { IPInfoContext } from "ip-info-react";
 import emojiFlags, { EFlagKeys } from "country-flags-emoji";
+import { Fragment } from "react";
+import { Listbox, Transition } from "@headlessui/react";
+
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { Combobox } from "@headlessui/react";
 
 interface Link {
   id: number;
@@ -34,25 +39,6 @@ const SearchBar = (p: {
   );
 };
 
-// generate a number between 5 and 10
-const randomLength = () => {
-  return Math.floor(Math.random() * 6) + 5;
-};
-
-const randomStringLetters = () => {
-  const randomLength = () => Math.floor(Math.random() * 6) + 5; // Generate a random length between 5 and 10
-  const length = randomLength();
-  let result = "";
-
-  for (let i = 0; i < length; i++) {
-    const randomCharCode = Math.floor(Math.random() * 52); // Generate a random index between 0 and 51 (inclusive)
-    const charCode = randomCharCode + (randomCharCode < 26 ? 65 : 71); // Convert the random index to ASCII code (65-90 for A-Z, 97-122 for a-z)
-    result += String.fromCharCode(charCode);
-  }
-
-  return result;
-};
-
 const Banner = () => {
   const userInfo = useContext(IPInfoContext);
 
@@ -72,44 +58,45 @@ const Banner = () => {
   );
 };
 
-// generate a string with 10 random words
-const randomWords = () => {
-  let words = "";
-  for (let i = 0; i < randomLength(); i++) {
-    words += randomStringLetters() + " ";
-  }
-  return words;
-};
-
 const LinkList = () => {
   // Access the fetched data
 
-  const [links, setlinks] = useState<Link[]>([]);
+  const { country_code, country_calling_code } = useContext(IPInfoContext);
 
-  useEffect(() => {
-    const _links: Link[] = [];
-    // generate a lists of links with random names and urls
-    for (let i = 6; i < 100; i++) {
-      _links.push({
-        id: i,
-        // make title random
-        title: randomWords(),
-        url: `https://www.example${i}.com`,
-      });
-    }
-    setlinks(_links);
-  }, []);
+  const flagData = emojiFlags.getAllCodes().map((code) => {
+    return {
+      code,
+      ...emojiFlags.flags[code as EFlagKeys],
+    };
+  });
+
+  // sort flags by names
+  flagData.sort((a, b) => a.name.localeCompare(b.name));
 
   // call useSearch hook to get autoCompleteSearch
   const [onTextChange, filteredObjects, searchText] = useSearch({
-    data: links,
+    data: flagData,
     maxResults: 10,
-    searchId: "id",
-    searchKey: "title",
+    searchId: "name",
+    searchKey: (obj) => {
+      return obj.name + " " + obj.code;
+    },
     tokenizer: " ",
   });
 
+  const deafultCode = "US" as EFlagKeys;
+
   // fill autoCompleteSearch
+
+  const [selected, setSelected] = useState(emojiFlags.flags[deafultCode]);
+  // if country code changes useeffect will be called
+  useEffect(() => {
+    setSelected(emojiFlags.flags[(country_code || deafultCode) as EFlagKeys]);
+  }, [country_code]);
+
+  function classNames(...classes: any[]) {
+    return classes.filter(Boolean).join(" ");
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col ">
@@ -118,21 +105,92 @@ const LinkList = () => {
         <h1 className="text-2xl font-semibold text-gray-900">
           My Links Collection
         </h1>
-        <SearchBar onTextChange={onTextChange} searchText={searchText} />
-        <ul className="mt-6 space-y-4">
-          {filteredObjects.map((link) => (
-            <li key={link.id} className="border-b border-gray-300">
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-600 hover:text-indigo-800 hover:underline"
-              >
-                {link.title}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <Combobox as="div" value={selected} onChange={setSelected}>
+          <Combobox.Label className="block text-sm font-medium leading-6 text-gray-900">
+            Assigned to
+          </Combobox.Label>
+          <div className="relative mt-2">
+            <Combobox.Input
+              className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              onChange={(event) => onTextChange(event.target.value)}
+              displayValue={(x: any) => x.name}
+            />
+            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+              <ChevronUpDownIcon
+                className="h-5 w-5 text-gray-400"
+                aria-hidden="true"
+              />
+            </Combobox.Button>
+
+            {filteredObjects.length > 0 && (
+              <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {filteredObjects.map(
+                  (flag) =>
+                    flag && (
+                      <Combobox.Option
+                        key={flag?.unicode}
+                        value={flag}
+                        className={({ active }) =>
+                          classNames(
+                            "relative cursor-default select-none py-2 pl-3 pr-9",
+                            active
+                              ? "bg-indigo-600 text-white"
+                              : "text-gray-900"
+                          )
+                        }
+                      >
+                        {({ active, selected }) => (
+                          <>
+                            <span
+                              className={classNames(
+                                "block truncate",
+                                selected && "font-semibold"
+                              )}
+                            >
+                              {flag.name}
+                            </span>
+
+                            {selected && (
+                              <span
+                                className={classNames(
+                                  "absolute inset-y-0 right-0 flex items-center pr-4",
+                                  active ? "text-white" : "text-indigo-600"
+                                )}
+                              >
+                                <CheckIcon
+                                  className="h-5 w-5"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </Combobox.Option>
+                    )
+                )}
+              </Combobox.Options>
+            )}
+          </div>
+        </Combobox>
+
+        {/* Make a tailwind textbox here */}
+        <div>
+          <label
+            htmlFor="phone"
+            className="block text-sm font-medium leading-6 text-gray-900"
+          >
+            Phone
+          </label>
+          <div className="mt-2">
+            <input
+              type="email"
+              name="email"
+              id="email"
+              className="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              placeholder={(country_calling_code || "+1") + " 123 456 789"}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

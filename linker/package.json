@@ -4,6 +4,8 @@
   "homepage": "https://neosh11.github.io/Linker/",
   "private": true,
   "dependencies": {
+    "@headlessui/react": "^1.7.13",
+    "@heroicons/react": "^2.0.16",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -11,7 +13,7 @@
     "@types/node": "^16.18.18",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "autocomplete-search-react": "^0.0.9",
+    "autocomplete-search-react": "^0.2.0",
     "country-flags-emoji": "^0.0.3",
     "ip-info-react": "^1.0.0",
     "react": "^18.2.0",
